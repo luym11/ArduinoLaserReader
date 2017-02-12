@@ -1,65 +1,17 @@
-/******************************************************************************
-Example program I2C-ADC interface with Arduino.
 
-SETUP:    I2C-ADC => Arduino
-          PIN7 => ground, PIN11 => A5(SCL), PIN12 => A4(SDA), PIN14 => +5V
-Note:     The program is written for address 0x90 (Arduino address 0x48).
-          This program was tested using Arduino Nano
-Document: AD7828 datasheet
-Updated:  September 4, 2008
-E-mail:   support@gravitech.us
-          Gravitech
-(C) Copyright 2008 All Rights Reserved
-*******************************************************************************/
+int sensorPin = A1;    // select the input pin for the potentiometer
+int sensorValue = 0;  // variable to store the value coming from the sensor
 
-#include <Wire.h> 
-
-/*******************************************************************************
-                      Setup
-*******************************************************************************/ 
-void setup() 
-{ 
-  Serial.begin(9600);
-  Wire.begin();             // join i2c bus (address optional for master) 
-  //delay(1000);
+void setup() {
+  // declare the ledPin as an OUTPUT:
   
-} 
- 
-/*******************************************************************************
-                      Main Loop
-*******************************************************************************/  
-void loop() 
-{
-  const int I2C_address = 0x48;  // I2C write address 
-  const byte DAT[8] = {0x8C,0xCC,0x9C,0xDC,0xAC,0xEC,0xBC,0xFC};// Constant configuration data
-  
-  byte Adval_High, Adval_Low;    // Store A/D value (high byte, low byte)
-  byte i; 
-  //delay(1000);
-  
-  for (i=0; i<=7; i++)
-  {
-    Wire.beginTransmission(I2C_address);
-    Wire.write(DAT[i]);        // Configure the device to read each CH  
-    Wire.endTransmission(); 
-    delay( 1 );
-    
-    // Read A/D value
-    Wire.requestFrom(I2C_address, 2);
-    while( Wire.available() )          // Checkf for data from slave
-    { 
-      Adval_High = Wire.read();   // Receive A/D high byte
-      Adval_Low = Wire.read();    // Receive A/D low byte
-    } 
-    
-    Serial.print("A/D value CH");
-    Serial.print(i, DEC);
-    Serial.print(" is ");
-    Serial.print(Adval_High,HEX);
-    if (Adval_Low <= 0x0F)
-      Serial.print("0");
-    Serial.println(Adval_Low,HEX);
-  }  
-  Serial.println();
+  Serial.begin(57600);
 }
 
+void loop() {
+  // read the value from the sensor:
+  sensorValue = analogRead(sensorPin);
+ 
+  Serial.println(sensorValue);
+   
+}
