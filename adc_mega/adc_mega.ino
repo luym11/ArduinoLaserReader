@@ -3,6 +3,10 @@
 #include <std_msgs/Int32.h>
 #include <ros/time.h>
 
+#define ERR_THR 800
+#define VALVE_THR 800
+#define DELAY_MILI 3
+
 ros::NodeHandle nh; 
 std_msgs::Float32 SICK_msg; 
 ros::Publisher SICK_time("SICK_time", &SICK_msg); 
@@ -52,13 +56,13 @@ void loop() {
   SICK_debug.data = (int)outputValue; 
   SICK_distance.publish(&SICK_debug); 
 
-  if(outputValue < 300 && t0_set_flag == false){
+  if(outputValue < VALVE_THR && t0_set_flag == false){
     t0 = millis(); 
     t0_set_flag = true; 
     //SICK_msg.data = (float)t0;
     //SICK_time.publish(&SICK_msg);
   }
-  if(outputValue > 300 && t0_set_flag == true && millis()-t0 > 500){
+  if(outputValue > VALVE_THR && t0_set_flag == true && millis()-t0 > ERR_THR){
     t1 = millis(); 
     t0_set_flag = false; 
     SICK_msg.data = (float)t1-t0;
@@ -66,6 +70,6 @@ void loop() {
   }
   
   nh.spinOnce(); 
-  delay(3); 
+  delay(DELAY_MILI); 
    
 }
