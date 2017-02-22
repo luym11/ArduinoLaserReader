@@ -13,6 +13,8 @@ ros::Publisher SICK_distance("SICK_distance", &SICK_debug);
 int sensorPin = A0;    // select the input pin for the potentiometer
 int sensorValue = 0;  // variable to store the value coming from the sensor
 int outputValue = 0; 
+int lastValues[10]; 
+int counter = 0; 
 float alpha = 0.2; 
 long t0 = 0; 
 long t1 = 0;
@@ -27,21 +29,36 @@ void setup() {
 }
 
 void loop() {
-  // read the value from the sensor:
-  //delay(5); 
+  
   sensorValue = analogRead(sensorPin);
-  outputValue = (1-alpha) * outputValue + alpha * sensorValue; 
+  
+  if(counter < 10){
+    lastValues[counter] = sensorValue; 
+    outputValue = sensorValue; 
+   }else{
+    lastValues[counter%10] = sensorValue; 
+    outputValue = 0;
+    for(int i = 0; i < 10; i++){
+      outputValue += lastValues[i]; 
+    }
+    outputValue /= 10; 
+   }
+  counter++; 
+  
+  if(counter == 20){ counter = 10; }
+  
+  
   //Serial.println(outputValue);
-  SICK_debug.data = (int)millis(); 
+  SICK_debug.data = (int)outputValue; 
   SICK_distance.publish(&SICK_debug); 
 
-  if(outputValue < 900 && t0_set_flag == false){
+  if(outputValue < 300 && t0_set_flag == false){
     t0 = millis(); 
     t0_set_flag = true; 
     //SICK_msg.data = (float)t0;
     //SICK_time.publish(&SICK_msg);
   }
-  if(outputValue > 900 && t0_set_flag == true && millis()-t0 > 1500){
+  if(outputValue > 300 && t0_set_flag == true && millis()-t0 > 500){
     t1 = millis(); 
     t0_set_flag = false; 
     SICK_msg.data = (float)t1-t0;
