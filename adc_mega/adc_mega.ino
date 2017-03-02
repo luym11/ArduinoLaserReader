@@ -25,7 +25,7 @@ void setup() {
   nh.initNode(); 
   nh.advertise(SICK_distance);
   nh.advertise(SICK_realdistance);
-  Serial.begin(57600);
+  Serial.begin(19200);
 }
 
 void loop() {
